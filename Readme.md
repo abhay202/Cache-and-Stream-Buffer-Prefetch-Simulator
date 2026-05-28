@@ -74,7 +74,7 @@ Write-back, Write-allocate (WBWA):
 
 ---
 
-## Stream-Buffer Prefetching (ECE 563 Extension)
+## Stream-Buffer Prefetching
 
 The prefetch unit consists of **N stream buffers**, each holding **M consecutive** memory blocks. Setting `PREF_N = 0` disables prefetching entirely.
 
@@ -82,7 +82,7 @@ The prefetch unit consists of **N stream buffers**, each holding **M consecutive
 - **No L2 cache**: stream buffers sit between L1 and main memory.
 - **With L2 cache**: stream buffers sit between L2 and main memory.
 
-### Operation — Four Scenarios
+### Four Scenarios
 
 On every cache access (read or write) to block X, both the cache and all stream buffers are checked simultaneously:
 
@@ -93,24 +93,11 @@ On every cache access (read or write) to block X, both the cache and all stream 
 | **#3** | Hit  | Miss | Normal cache hit. No stream buffer action. |
 | **#4** | Hit  | Hit  | Normal cache hit. Advance the stream buffer identically to Scenario #2 (no transfer to cache). |
 
-### Stream Buffer Advancement (Scenarios #2 and #4)
-
-If block X is found at position `j` (0-indexed from the head of the stream buffer):
-- Remove blocks at positions 0 through j.
-- Prefetch **j + 1** new blocks from memory to refill the buffer tail.
-- The stream buffer now holds blocks [X+1 … X+M].
-
 ### Multiple Stream Buffer Policy
 
 When multiple buffers contain block X, only the **most-recently-used** (MRU) buffer among those that hit is advanced. The rest are ignored.
 
 The LRU buffer is selected for replacement when a new stream must be started (Scenario #1).
-
-### Counters
-
-- **L1 prefetches** (g): total blocks fetched from memory into stream buffers (when SB is at L1).
-- **L2 prefetches** (p): total blocks fetched from memory into stream buffers (when SB is at L2).
-- **Memory traffic** (q): demand fetches to memory + writebacks + prefetch fetches.
 
 ---
 
